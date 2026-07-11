@@ -1,4 +1,6 @@
-﻿const DICTIONARY_API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/";
+﻿importScripts("glossary-vendor-cloud.js");
+
+const DICTIONARY_API_BASE = "https://api.dictionaryapi.dev/api/v2/entries/";
 const WIKTIONARY_API_BASES = {
   es: "https://es.wiktionary.org/w/api.php",
   en: "https://en.wiktionary.org/w/api.php"
@@ -659,6 +661,8 @@ const TECH_TERMS = {
   }
 };
 
+Object.assign(TECH_TERMS, self.VENDOR_CLOUD_TERMS || {});
+
 const TECH_ALIAS_INDEX = buildTechAliasIndex(TECH_TERMS);
 
 const LOCAL_DEFINITIONS = {};
@@ -966,6 +970,12 @@ function buildTechAliasIndex(terms) {
 
 function findTechEntry(term, context) {
   const normalizedTerm = normalizeTechKey(term);
+  const disambiguatedKey = disambiguateTechKey(normalizedTerm, context);
+
+  if (disambiguatedKey) {
+    return TECH_TERMS[disambiguatedKey];
+  }
+
   const directKey = TECH_ALIAS_INDEX.get(normalizedTerm);
 
   if (directKey) {
@@ -979,6 +989,24 @@ function findTechEntry(term, context) {
   }
 
   return null;
+}
+
+function disambiguateTechKey(normalizedTerm, context) {
+  if (normalizedTerm !== "vpc") {
+    return "";
+  }
+
+  const normalizedContext = normalizeTechKey(context);
+
+  if (/\b(cisco|nexus|nx os|nx-os|peer link|port channel|vpc peer)\b/.test(normalizedContext)) {
+    return "vpc_cisco";
+  }
+
+  if (/\b(aws|amazon|subnet|route table|internet gateway|transit gateway|security group)\b/.test(normalizedContext)) {
+    return "aws_vpc";
+  }
+
+  return "aws_vpc";
 }
 
 function findTechKeyInText(text) {
@@ -1069,7 +1097,7 @@ function normalizeQuery(value) {
   return String(value || "")
     .trim()
     .toLocaleLowerCase("es")
-    .replace(/[^\p{L}\p{N}\-\s']/gu, "")
+    .replace(/[^\p{L}\p{N}\-\s'.#+/_]/gu, "")
     .replace(/\s+/g, " ")
     .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
 }
@@ -1113,3 +1141,4 @@ function tokenize(value) {
 function removeAccents(value) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
