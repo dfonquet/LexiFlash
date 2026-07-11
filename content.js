@@ -1,6 +1,6 @@
-let lexiButton = null;
+﻿let lexiButton = null;
 let lexiPopup = null;
-let currentWord = "";
+let currentTerm = "";
 
 function getSelectedText() {
   const selection = window.getSelection();
@@ -11,7 +11,7 @@ function getSelectedText() {
   if (text.split(/\s+/).length > 8) return "";
 
   return text
-    .replace(/[^\p{L}\p{N}\-\s']/gu, "")
+    .replace(/[^\p{L}\p{N}\-\s'.#+]/gu, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -51,25 +51,25 @@ function removeLexiUI() {
   }
 }
 
-function createFloatingButton(x, y, word) {
+function createFloatingButton(x, y, term) {
   removeLexiUI();
 
   lexiButton = document.createElement("button");
   lexiButton.className = "lexi-button";
-  lexiButton.textContent = "Define";
+  lexiButton.textContent = "Explain";
   lexiButton.style.left = `${x}px`;
   lexiButton.style.top = `${y}px`;
 
   lexiButton.addEventListener("click", async () => {
     lexiButton.disabled = true;
-    lexiButton.textContent = "Loading...";
+    lexiButton.textContent = "Checking...";
 
     try {
       const response = await chrome.runtime.sendMessage({
         type: "GET_MEANING",
         payload: {
-          text: word,
-          context: getSelectionContext(word)
+          text: term,
+          context: getSelectionContext(term)
         }
       });
 
@@ -78,7 +78,11 @@ function createFloatingButton(x, y, word) {
       console.error("LexiFlash content error:", error);
       showPopup(x, y + 40, {
         ok: false,
-        summary: "Something went wrong while retrieving the meaning."
+        title: term,
+        kind: "Lookup error",
+        definition: "Something went wrong while checking this technology term.",
+        whyItMatters: "",
+        sources: []
       });
     } finally {
       if (lexiButton) {
@@ -100,23 +104,38 @@ function showPopup(x, y, result) {
   lexiPopup.className = "lexi-popup";
   lexiPopup.style.left = `${x}px`;
   lexiPopup.style.top = `${y}px`;
-  const sourceLabel = result?.source && result.source !== "none"
-    ? `<div class="lexi-source">Source: ${escapeHtml(result.source)}</div>`
+
+  const sources = Array.isArray(result?.sources) ? result.sources : [];
+  const sourceLinks = sources.length
+    ? `
+      <div class="lexi-sources">
+        ${sources.map((source) => {
+          return `
+            <a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(source.label)}
+            </a>
+          `;
+        }).join("")}
+      </div>
+    `
     : "";
 
   lexiPopup.innerHTML = `
     <div class="lexi-popup-header">
-      <strong>${escapeHtml(currentWord)}</strong>
-      <button class="lexi-close" aria-label="Close popup">×</button>
+      <div>
+        <strong>${escapeHtml(result?.title || currentTerm)}</strong>
+        <span>${escapeHtml(result?.kind || "Technology term")}</span>
+      </div>
+      <button class="lexi-close" aria-label="Close popup">x</button>
     </div>
     <div class="lexi-popup-body">
-      ${escapeHtml(result?.summary || "No definition available.")}
-      ${sourceLabel}
+      <p>${escapeHtml(result?.definition || result?.summary || "No definition available.")}</p>
+      ${result?.whyItMatters ? `<p><strong>Why it matters:</strong> ${escapeHtml(result.whyItMatters)}</p>` : ""}
+      ${sourceLinks}
     </div>
   `;
 
   const closeBtn = lexiPopup.querySelector(".lexi-close");
-  closeBtn.textContent = "x";
   closeBtn.addEventListener("click", () => {
     lexiPopup.remove();
     lexiPopup = null;
@@ -138,16 +157,20 @@ function escapeHtml(text) {
   });
 }
 
+function escapeAttr(text) {
+  return escapeHtml(text).replace(/`/g, "&#96;");
+}
+
 document.addEventListener("mouseup", (event) => {
   setTimeout(() => {
-    const word = getSelectedText();
+    const term = getSelectedText();
 
-    if (!word) {
+    if (!term) {
       return;
     }
 
-    currentWord = word;
-    createFloatingButton(event.pageX + 10, event.pageY + 10, word);
+    currentTerm = term;
+    createFloatingButton(event.pageX + 10, event.pageY + 10, term);
   }, 10);
 });
 

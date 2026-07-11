@@ -1,25 +1,39 @@
 ﻿# LexiFlash
 
-LexiFlash is a browser extension that shows concise word and phrase meanings while you browse.
+LexiFlash is a browser extension that explains technology terms while you browse.
 
-It is designed to reduce friction while reading online content in Spanish, English, and other common languages. Instead of opening a new tab and searching manually, users can select a word or short phrase and view a clear meaning directly on the current page.
+It is focused on engineering and web terminology. Select a term such as `HTTP`, `DNS`, `JWT`, `CORS`, `TCP`, `TLS`, `REST`, or `JSON`, and LexiFlash shows what it is, why it matters, and links to official references such as RFCs, MDN, WHATWG, W3C, TC39, ISO, or vendor docs.
 
 ## Overview
 
-LexiFlash focuses on fast, in-page vocabulary support. The extension keeps the reading flow uninterrupted with short definitions, bilingual references, local preferences, and a simple interaction model.
+LexiFlash is not a general translator. It is a lightweight technical glossary that helps readers understand protocols, APIs, languages, formats, and web platform concepts without leaving the current page.
 
 ## Current features
 
-- Select a word or short phrase on any webpage.
+- Select a technology term or short phrase on any webpage.
 - Show a small floating action near the selection.
-- Display a short meaning in an in-page popup.
-- Fetch definitions from dictionary sources in Spanish and English.
-- Use nearby paragraph context to prioritize the most likely meaning.
-- Offer adjustable definition detail levels.
+- Display a concise explanation in an in-page popup.
+- Show the concept type, definition, and why it matters.
+- Include official or high-quality source links such as RFCs and MDN.
 - Save recent lookups in a popup history view.
 - Let users disable history from the settings page.
 - Store preferences locally with `chrome.storage`.
 - Use a modern Manifest V3 extension architecture.
+
+## Covered examples
+
+- HTTP / HTTPS
+- DNS
+- TCP / UDP / IP
+- TLS / SSL
+- CORS
+- JWT
+- OAuth 2.0
+- REST
+- API
+- JSON
+- HTML / CSS / JavaScript
+- SQL
 
 ## Tech stack
 
@@ -29,8 +43,7 @@ LexiFlash focuses on fast, in-page vocabulary support. The extension keeps the r
 - Chrome Extensions API
 - Manifest V3
 - `chrome.storage` for local persistence
-- `dictionaryapi.dev` for dictionary lookups
-- Wikcionario and Wiktionary for Spanish and English references
+- Local technical glossary with official source links
 
 ## Project structure
 
@@ -53,71 +66,47 @@ lexiflash/
 
 ## Development setup
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/YOUR-USERNAME/lexiflash.git
-```
-
-2. Enter the project folder:
-
-```bash
-cd lexiflash
-```
-
-3. Open Chrome and go to:
+1. Open Chrome and go to:
 
 ```text
 chrome://extensions/
 ```
 
-4. Enable **Developer mode**.
+2. Enable **Developer mode**.
 
-5. Click **Load unpacked** and select the project folder.
+3. Click **Load unpacked** and select the project folder.
+
+```text
+E:\Git-Path\LexiFlash
+```
+
+4. After code changes, click **Reload** on the extension and refresh the page you are testing.
 
 ## Expected user flow
 
-1. Open any webpage.
-2. Select a word or short phrase.
+1. Open any technical article or documentation page.
+2. Select a term like `CORS`, `JWT`, `DNS`, or `REST API`.
 3. Click the LexiFlash floating action.
-4. Read the short definition inside the page.
+4. Read the definition and source links in the current page.
 5. Review previous searches from the extension popup.
-6. Adjust detail level or history saving from settings.
 
 ## Current status
 
-This project has a working MVP for local browser testing.
-
-### First milestone
-
-The MVP can:
-
-- detect a selected word or phrase,
-- show a floating button,
-- return a real or fallback definition with ES/EN references,
-- render a simple in-page popup,
-- store recent lookups,
-- open and save settings.
+This project has a working local MVP for technology explanations.
 
 ## Roadmap
 
 - [x] Create the base project structure.
 - [x] Define the Manifest V3 configuration.
-- [x] Implement `content.js` selection handling.
-- [x] Implement messaging with `service-worker.js`.
+- [x] Implement selection handling.
 - [x] Build the popup with recent history.
 - [x] Build the options page.
-- [x] Integrate a real definition source with a local fallback.
-- [ ] Improve UX and accessibility.
-- [ ] Add linting or a small manual QA checklist.
+- [x] Add a technology-focused local glossary.
+- [x] Add official source links for supported terms.
+- [ ] Expand the glossary with more cloud, security, backend, and frontend terms.
+- [ ] Add fuzzy matching for related terms.
+- [ ] Add a backend or AI mode for unknown concepts.
 - [ ] Publish the first functional version.
-
-## Project principles
-
-- Keep the code simple and modular.
-- Build the MVP first, then iterate.
-- Avoid unnecessary dependencies at the start.
-- Stay aligned with Manifest V3 practices.
 
 ## License
 
