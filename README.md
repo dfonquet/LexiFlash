@@ -1,19 +1,20 @@
 ﻿# LexiFlash
 
-LexiFlash is a browser extension that shows concise Spanish word definitions while you browse.
+LexiFlash is a browser extension that shows concise word and phrase meanings while you browse.
 
-It is designed to reduce friction while reading online content in Spanish. Instead of opening a new tab and searching manually, users can select a word and view a short, clear meaning directly on the current page.
+It is designed to reduce friction while reading online content in Spanish, English, and other common languages. Instead of opening a new tab and searching manually, users can select a word or short phrase and view a clear meaning directly on the current page.
 
 ## Overview
 
-LexiFlash focuses on fast, in-page vocabulary support for Spanish readers. The extension keeps the reading flow uninterrupted with short definitions, lightweight UI, local preferences, and a simple interaction model.
+LexiFlash focuses on fast, in-page vocabulary support. The extension keeps the reading flow uninterrupted with short definitions, bilingual references, local preferences, and a simple interaction model.
 
 ## Current features
 
-- Select a Spanish word on any webpage.
+- Select a word or short phrase on any webpage.
 - Show a small floating action near the selection.
 - Display a short meaning in an in-page popup.
-- Fetch definitions from a dictionary API with a small local fallback.
+- Fetch definitions from dictionary sources in Spanish and English.
+- Use nearby paragraph context to prioritize the most likely meaning.
 - Offer adjustable definition detail levels.
 - Save recent lookups in a popup history view.
 - Let users disable history from the settings page.
@@ -29,6 +30,7 @@ LexiFlash focuses on fast, in-page vocabulary support for Spanish readers. The e
 - Manifest V3
 - `chrome.storage` for local persistence
 - `dictionaryapi.dev` for dictionary lookups
+- Wikcionario and Wiktionary for Spanish and English references
 
 ## Project structure
 
@@ -76,7 +78,7 @@ chrome://extensions/
 ## Expected user flow
 
 1. Open any webpage.
-2. Select a Spanish word.
+2. Select a word or short phrase.
 3. Click the LexiFlash floating action.
 4. Read the short definition inside the page.
 5. Review previous searches from the extension popup.
@@ -90,9 +92,9 @@ This project has a working MVP for local browser testing.
 
 The MVP can:
 
-- detect a selected word,
+- detect a selected word or phrase,
 - show a floating button,
-- return a real or fallback definition,
+- return a real or fallback definition with ES/EN references,
 - render a simple in-page popup,
 - store recent lookups,
 - open and save settings.

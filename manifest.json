@@ -7,7 +7,9 @@
     "storage"
   ],
   "host_permissions": [
-    "https://api.dictionaryapi.dev/*"
+    "https://api.dictionaryapi.dev/*",
+    "https://es.wiktionary.org/*",
+    "https://en.wiktionary.org/*"
   ],
   "background": {
     "service_worker": "service-worker.js"
