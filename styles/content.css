@@ -90,3 +90,10 @@
   color: #1f2937;
   word-break: break-word;
 }
+
+.lexi-source {
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #6b7280;
+}

@@ -71,6 +71,9 @@ function showPopup(x, y, result) {
   lexiPopup.className = "lexi-popup";
   lexiPopup.style.left = `${x}px`;
   lexiPopup.style.top = `${y}px`;
+  const sourceLabel = result?.source && result.source !== "none"
+    ? `<div class="lexi-source">Source: ${escapeHtml(result.source)}</div>`
+    : "";
 
   lexiPopup.innerHTML = `
     <div class="lexi-popup-header">
@@ -78,11 +81,13 @@ function showPopup(x, y, result) {
       <button class="lexi-close" aria-label="Close popup">×</button>
     </div>
     <div class="lexi-popup-body">
-      ${result?.ok ? escapeHtml(result.summary) : "No definition available."}
+      ${escapeHtml(result?.summary || "No definition available.")}
+      ${sourceLabel}
     </div>
   `;
 
   const closeBtn = lexiPopup.querySelector(".lexi-close");
+  closeBtn.textContent = "x";
   closeBtn.addEventListener("click", () => {
     lexiPopup.remove();
     lexiPopup = null;
@@ -92,7 +97,7 @@ function showPopup(x, y, result) {
 }
 
 function escapeHtml(text) {
-  return text.replace(/[&<>"']/g, (char) => {
+  return String(text).replace(/[&<>"']/g, (char) => {
     const entities = {
       "&": "&amp;",
       "<": "&lt;",
