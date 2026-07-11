@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LexiFlash Settings</title>
+  <link rel="stylesheet" href="styles/options.css" />
+</head>
+<body>
+  <main class="options-page">
+    <header class="options-header">
+      <h1>LexiFlash Settings</h1>
+      <p>Customize how LexiFlash shows Spanish word meanings while you browse.</p>
+    </header>
+
+    <section class="options-card" aria-labelledby="behavior-title">
+      <h2 id="behavior-title">Behavior</h2>
+
+      <form id="settingsForm">
+        <div class="field">
+          <label for="detailLevel">Definition detail level</label>
+          <select id="detailLevel" name="detailLevel">
+            <option value="short">Short</option>
+            <option value="medium">Medium</option>
+          </select>
+        </div>
+
+        <div class="field checkbox-field">
+          <input type="checkbox" id="saveHistory" name="saveHistory" checked />
+          <label for="saveHistory">Save recent lookups</label>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Save settings</button>
+        </div>
+
+        <p id="statusMessage" class="status-message" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>
