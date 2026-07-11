@@ -1,184 +1,195 @@
-﻿let lexiButton = null;
-let lexiPopup = null;
-let currentTerm = "";
+﻿let explainButton = null;
+let definitionPopup = null;
+let activeWord = "";
+let isLookingUp = false;
+let suppressNextSelection = false;
 
-function getSelectedText() {
+function getCurrentSelection() {
   const selection = window.getSelection();
-  if (!selection) return "";
+  if (!selection || selection.rangeCount === 0) return null;
 
   const text = selection.toString().trim();
-  if (!text) return "";
-  if (text.split(/\s+/).length > 8) return "";
-
-  return text
-    .replace(/[^\p{L}\p{N}\-\s'.#+]/gu, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function getSelectionContext(selectedText) {
-  const selection = window.getSelection();
-  if (!selection || !selection.rangeCount) return selectedText;
+  if (!text || text.length > 80) return null;
 
   const range = selection.getRangeAt(0);
-  const container = range.commonAncestorContainer;
-  const host = container.nodeType === Node.TEXT_NODE
-    ? container.parentElement
-    : container;
-  const sourceText = host?.innerText || host?.textContent || "";
-  const normalizedSource = sourceText.replace(/\s+/g, " ").trim();
-  const index = normalizedSource.toLowerCase().indexOf(selectedText.toLowerCase());
+  const rect = range.getBoundingClientRect();
+  if (!rect || (!rect.width && !rect.height)) return null;
 
-  if (index === -1) {
-    return normalizedSource.slice(0, 500);
-  }
-
-  const start = Math.max(0, index - 240);
-  const end = Math.min(normalizedSource.length, index + selectedText.length + 240);
-
-  return normalizedSource.slice(start, end);
+  return { text, rect };
 }
 
-function removeLexiUI() {
-  if (lexiButton) {
-    lexiButton.remove();
-    lexiButton = null;
-  }
-
-  if (lexiPopup) {
-    lexiPopup.remove();
-    lexiPopup = null;
+function clearSelection() {
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
   }
 }
 
-function createFloatingButton(x, y, term) {
-  removeLexiUI();
-
-  lexiButton = document.createElement("button");
-  lexiButton.className = "lexi-button";
-  lexiButton.textContent = "Explain";
-  lexiButton.style.left = `${x}px`;
-  lexiButton.style.top = `${y}px`;
-
-  lexiButton.addEventListener("click", async () => {
-    lexiButton.disabled = true;
-    lexiButton.textContent = "Checking...";
-
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: "GET_MEANING",
-        payload: {
-          text: term,
-          context: getSelectionContext(term)
-        }
-      });
-
-      showPopup(x, y + 40, response);
-    } catch (error) {
-      console.error("LexiFlash content error:", error);
-      showPopup(x, y + 40, {
-        ok: false,
-        title: term,
-        kind: "Lookup error",
-        definition: "Something went wrong while checking this technology term.",
-        whyItMatters: "",
-        sources: []
-      });
-    } finally {
-      if (lexiButton) {
-        lexiButton.remove();
-        lexiButton = null;
-      }
-    }
-  });
-
-  document.body.appendChild(lexiButton);
+function removeExplainButton() {
+  if (explainButton) {
+    explainButton.remove();
+    explainButton = null;
+  }
 }
 
-function showPopup(x, y, result) {
-  if (lexiPopup) {
-    lexiPopup.remove();
+function removeDefinitionPopup() {
+  if (definitionPopup) {
+    definitionPopup.remove();
+    definitionPopup = null;
   }
+}
 
-  lexiPopup = document.createElement("div");
-  lexiPopup.className = "lexi-popup";
-  lexiPopup.style.left = `${x}px`;
-  lexiPopup.style.top = `${y}px`;
+function isInsideLexiFlashUI(target) {
+  return (
+    (explainButton && explainButton.contains(target)) ||
+    (definitionPopup && definitionPopup.contains(target))
+  );
+}
 
-  const sources = Array.isArray(result?.sources) ? result.sources : [];
-  const sourceLinks = sources.length
-    ? `
-      <div class="lexi-sources">
-        ${sources.map((source) => {
-          return `
-            <a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">
-              ${escapeHtml(source.label)}
-            </a>
-          `;
-        }).join("")}
-      </div>
-    `
-    : "";
+function positionElement(element, rect, offsetY = 10) {
+  const top = window.scrollY + rect.bottom + offsetY;
+  const left = Math.min(
+    window.scrollX + rect.left,
+    window.scrollX + window.innerWidth - 320
+  );
 
-  lexiPopup.innerHTML = `
-    <div class="lexi-popup-header">
-      <div>
-        <strong>${escapeHtml(result?.title || currentTerm)}</strong>
-        <span>${escapeHtml(result?.kind || "Technology term")}</span>
-      </div>
-      <button class="lexi-close" aria-label="Close popup">x</button>
+  element.style.top = `${Math.max(window.scrollY + 12, top)}px`;
+  element.style.left = `${Math.max(window.scrollX + 12, left)}px`;
+}
+
+function showDefinitionPopup(word, definition, rect) {
+  removeDefinitionPopup();
+
+  definitionPopup = document.createElement("div");
+  definitionPopup.className = "lexiflash-popup";
+  definitionPopup.innerHTML = `
+    <div class="lexiflash-popup-header">
+      <strong>${word}</strong>
+      <button class="lexiflash-close" type="button" aria-label="Close">×</button>
     </div>
-    <div class="lexi-popup-body">
-      <p>${escapeHtml(result?.definition || result?.summary || "No definition available.")}</p>
-      ${result?.whyItMatters ? `<p><strong>Why it matters:</strong> ${escapeHtml(result.whyItMatters)}</p>` : ""}
-      ${sourceLinks}
-    </div>
+    <div class="lexiflash-popup-body">${definition}</div>
   `;
 
-  const closeBtn = lexiPopup.querySelector(".lexi-close");
-  closeBtn.addEventListener("click", () => {
-    lexiPopup.remove();
-    lexiPopup = null;
+  const closeBtn = definitionPopup.querySelector(".lexiflash-close");
+  closeBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    removeDefinitionPopup();
   });
 
-  document.body.appendChild(lexiPopup);
+  document.body.appendChild(definitionPopup);
+  positionElement(definitionPopup, rect, 14);
 }
 
-function escapeHtml(text) {
-  return String(text).replace(/[&<>"']/g, (char) => {
-    const entities = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      "\"": "&quot;",
-      "'": "&#39;"
-    };
-    return entities[char];
+function showExplainButton(text, rect) {
+  removeExplainButton();
+
+  explainButton = document.createElement("button");
+  explainButton.type = "button";
+  explainButton.className = "lexiflash-button";
+  explainButton.textContent = "Explain";
+
+  positionElement(explainButton, rect, 8);
+
+  explainButton.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    suppressNextSelection = true;
   });
+
+  explainButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isLookingUp) return;
+
+    isLookingUp = true;
+    suppressNextSelection = true;
+    activeWord = text;
+
+    const savedRect = rect;
+    removeExplainButton();
+    clearSelection();
+
+    chrome.runtime.sendMessage(
+      { type: "LOOKUP_WORD", word: text },
+      (response) => {
+        isLookingUp = false;
+
+        if (chrome.runtime.lastError) {
+          showDefinitionPopup(
+            text,
+            "Extension error: could not contact background service.",
+            savedRect
+          );
+          return;
+        }
+
+        if (!response || !response.success) {
+          showDefinitionPopup(
+            text,
+            "No definition found for this term.",
+            savedRect
+          );
+          return;
+        }
+
+        showDefinitionPopup(
+          response.word || text,
+          response.definition || "No definition found.",
+          savedRect
+        );
+      }
+    );
+  });
+
+  document.body.appendChild(explainButton);
 }
 
-function escapeAttr(text) {
-  return escapeHtml(text).replace(/`/g, "&#96;");
+function handleSelection(event) {
+  if (suppressNextSelection) {
+    suppressNextSelection = false;
+    return;
+  }
+
+  if (isLookingUp) return;
+  if (event && isInsideLexiFlashUI(event.target)) return;
+
+  const data = getCurrentSelection();
+
+  if (!data) {
+    removeExplainButton();
+    return;
+  }
+
+  activeWord = data.text;
+  showExplainButton(data.text, data.rect);
 }
 
 document.addEventListener("mouseup", (event) => {
-  setTimeout(() => {
-    const term = getSelectedText();
-
-    if (!term) {
-      return;
-    }
-
-    currentTerm = term;
-    createFloatingButton(event.pageX + 10, event.pageY + 10, term);
-  }, 10);
+  setTimeout(() => handleSelection(event), 10);
 });
 
 document.addEventListener("mousedown", (event) => {
-  const clickedButton = lexiButton && lexiButton.contains(event.target);
-  const clickedPopup = lexiPopup && lexiPopup.contains(event.target);
+  if (isInsideLexiFlashUI(event.target)) return;
 
-  if (!clickedButton && !clickedPopup) {
-    removeLexiUI();
+  removeExplainButton();
+
+  if (definitionPopup && !definitionPopup.contains(event.target)) {
+    removeDefinitionPopup();
   }
 });
+
+document.addEventListener("keyup", (event) => {
+  if (event.key === "Escape") {
+    removeExplainButton();
+    removeDefinitionPopup();
+    clearSelection();
+    return;
+  }
+
+  setTimeout(() => handleSelection(event), 10);
+});
+
+document.addEventListener("scroll", () => {
+  removeExplainButton();
+}, true);
