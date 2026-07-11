@@ -1,0 +1,92 @@
+.lexi-button {
+  position: absolute;
+  z-index: 2147483647;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+}
+
+.lexi-button:hover {
+  background: #1f2937;
+  transform: translateY(-1px);
+}
+
+.lexi-button:active {
+  transform: translateY(0);
+}
+
+.lexi-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.lexi-button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.lexi-popup {
+  position: absolute;
+  z-index: 2147483647;
+  width: min(320px, calc(100vw - 24px));
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.lexi-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f3f4f6;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.lexi-popup-header strong {
+  font-size: 14px;
+  color: #111827;
+}
+
+.lexi-close {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.lexi-close:hover {
+  background: rgba(17, 24, 39, 0.08);
+  color: #111827;
+}
+
+.lexi-close:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.lexi-popup-body {
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1f2937;
+  word-break: break-word;
+}
