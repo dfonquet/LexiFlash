@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LexiFlash</title>
+  <link rel="stylesheet" href="styles/popup.css" />
+</head>
+<body>
+  <main class="popup">
+    <header class="popup-header">
+      <h1>LexiFlash</h1>
+      <p>Quick Spanish word meanings while you browse.</p>
+    </header>
+
+    <section class="popup-section" aria-labelledby="history-title">
+      <div class="section-head">
+        <h2 id="history-title">Recent lookups</h2>
+      </div>
+
+      <ul id="historyList" class="history-list">
+        <li class="history-empty">No recent lookups yet.</li>
+      </ul>
+    </section>
+
+    <footer class="popup-footer">
+      <button id="openOptions" type="button">Open settings</button>
+    </footer>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>
