@@ -2,7 +2,7 @@
 
 LexiFlash is a browser extension that explains technology terms while you browse.
 
-It is focused on engineering and web terminology. Select a term such as `HTTP`, `DNS`, `JWT`, `CORS`, `TCP`, `TLS`, `REST`, or `JSON`, and LexiFlash shows what it is, why it matters, and links to official references such as RFCs, MDN, WHATWG, W3C, TC39, ISO, or vendor docs.
+It is focused on engineering, networking, and web infrastructure terminology. Select a term such as `BGP`, `MPLS`, `SRv6`, `DNS`, `HTTP`, `TLS`, `TCP`, `ports`, `CORS`, or `JWT`, and LexiFlash shows what it is, why it matters, and links to official references such as RFCs, IANA, MDN, WHATWG, W3C, TC39, IEEE, NIST, ISO, or vendor docs.
 
 ## Overview
 
@@ -22,18 +22,14 @@ LexiFlash is not a general translator. It is a lightweight technical glossary th
 
 ## Covered examples
 
-- HTTP / HTTPS
-- DNS
-- TCP / UDP / IP
-- TLS / SSL
-- CORS
-- JWT
-- OAuth 2.0
-- REST
-- API
-- JSON
-- HTML / CSS / JavaScript
-- SQL
+- Routing: BGP, MP-BGP, BGP-LU, OSPF, IS-IS, EIGRP, RIP
+- MPLS and Segment Routing: MPLS, SR, SR-MPLS, SRv6
+- Layer 2 and overlays: VLAN, STP, LACP, VXLAN
+- Transport and internet layer: IP, TCP, UDP, ICMP, IGMP, QUIC
+- Security and access: TLS, IPsec, VPN, ACL, firewall, SSH
+- Addressing and services: DNS, DHCP, NAT, VRF, MTU, ports
+- Application protocols: HTTP, HTTPS, HTTP/2, HTTP/3, SMTP, IMAP, POP3, FTP, LDAP, SIP, RTP, SNMP, NTP
+- Web/dev basics: API, REST, JSON, HTML, CSS, JavaScript, SQL, JWT, OAuth 2.0
 
 ## Tech stack
 
@@ -103,7 +99,8 @@ This project has a working local MVP for technology explanations.
 - [x] Build the options page.
 - [x] Add a technology-focused local glossary.
 - [x] Add official source links for supported terms.
-- [ ] Expand the glossary with more cloud, security, backend, and frontend terms.
+- [x] Expand the glossary with core networking and infrastructure terms.
+- [ ] Add more cloud, security, backend, and frontend terms.
 - [ ] Add fuzzy matching for related terms.
 - [ ] Add a backend or AI mode for unknown concepts.
 - [ ] Publish the first functional version.

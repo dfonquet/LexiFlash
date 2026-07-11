@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LexiFlash",
   "version": "0.1.0",
-  "description": "A browser extension that explains technology terms with concise definitions and official sources.",
+  "description": "Explains networking, web, and infrastructure terms with concise definitions and official sources.",
   "permissions": [
     "storage"
   ],
