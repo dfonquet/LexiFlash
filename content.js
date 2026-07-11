@@ -50,7 +50,7 @@ function positionElement(element, rect, offsetY = 10) {
   const top = window.scrollY + rect.bottom + offsetY;
   const left = Math.min(
     window.scrollX + rect.left,
-    window.scrollX + window.innerWidth - 320
+    window.scrollX + window.innerWidth - 410
   );
 
   element.style.top = `${Math.max(window.scrollY + 12, top)}px`;
@@ -61,16 +61,16 @@ function showDefinitionPopup(word, definition, rect) {
   removeDefinitionPopup();
 
   definitionPopup = document.createElement("div");
-  definitionPopup.className = "lexiflash-popup";
+  definitionPopup.className = "lexi-popup";
   definitionPopup.innerHTML = `
-    <div class="lexiflash-popup-header">
-      <strong>${word}</strong>
-      <button class="lexiflash-close" type="button" aria-label="Close">×</button>
+    <div class="lexi-popup-header">
+      <strong>${escapeHtml(word)}</strong>
+      <button class="lexi-close" type="button" aria-label="Close">x</button>
     </div>
-    <div class="lexiflash-popup-body">${definition}</div>
+    <div class="lexi-popup-body">${definition}</div>
   `;
 
-  const closeBtn = definitionPopup.querySelector(".lexiflash-close");
+  const closeBtn = definitionPopup.querySelector(".lexi-close");
   closeBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     removeDefinitionPopup();
@@ -85,7 +85,7 @@ function showExplainButton(text, rect) {
 
   explainButton = document.createElement("button");
   explainButton.type = "button";
-  explainButton.className = "lexiflash-button";
+  explainButton.className = "lexi-button";
   explainButton.textContent = "Explain";
 
   positionElement(explainButton, rect, 8);
@@ -110,8 +110,13 @@ function showExplainButton(text, rect) {
     removeExplainButton();
     clearSelection();
 
+    showDefinitionPopup(text, "Checking glossary...", savedRect);
+
     chrome.runtime.sendMessage(
-      { type: "LOOKUP_WORD", word: text },
+      {
+        type: "GET_MEANING",
+        payload: { text }
+      },
       (response) => {
         isLookingUp = false;
 
@@ -124,18 +129,22 @@ function showExplainButton(text, rect) {
           return;
         }
 
-        if (!response || !response.success) {
+        if (!response || !response.ok) {
           showDefinitionPopup(
-            text,
-            "No definition found for this term.",
+            response?.title || text,
+            renderDefinitionResult(response || {
+              definition: "No definition found for this term.",
+              whyItMatters: "Try a supported networking, infrastructure, cloud, or security term.",
+              sources: []
+            }),
             savedRect
           );
           return;
         }
 
         showDefinitionPopup(
-          response.word || text,
-          response.definition || "No definition found.",
+          response.title || response.word || text,
+          renderDefinitionResult(response),
           savedRect
         );
       }
@@ -143,6 +152,47 @@ function showExplainButton(text, rect) {
   });
 
   document.body.appendChild(explainButton);
+}
+
+function renderDefinitionResult(result) {
+  const sources = Array.isArray(result?.sources) ? result.sources : [];
+  const sourceLinks = sources.length
+    ? `
+      <div class="lexi-sources">
+        ${sources.map((source) => {
+          return `
+            <a href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer">
+              ${escapeHtml(source.label)}
+            </a>
+          `;
+        }).join("")}
+      </div>
+    `
+    : "";
+
+  return `
+    ${result?.kind ? `<p><strong>${escapeHtml(result.kind)}</strong></p>` : ""}
+    <p>${escapeHtml(result?.definition || "No definition available.")}</p>
+    ${result?.whyItMatters ? `<p><strong>Why it matters:</strong> ${escapeHtml(result.whyItMatters)}</p>` : ""}
+    ${sourceLinks}
+  `;
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (char) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    };
+    return entities[char];
+  });
+}
+
+function escapeAttr(text) {
+  return escapeHtml(text).replace(/`/g, "&#96;");
 }
 
 function handleSelection(event) {
